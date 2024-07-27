@@ -2,16 +2,20 @@ import "./pagination.css";
 import classNames from "classnames";
 
 const range = (start, end) => {
-  return [...Array(end).keys()].map((el) => el + start);
+  return [...Array(end-start).keys()].map((el) => el + start);
 };
 const getPagesCut = ({pagesCount, pagesCutCount, currentPage}) => {
     const ceiling = Math.ceil(pagesCutCount / 2);
     const floor = Math.floor(pagesCutCount / 2);
-    console.log("Ceiling", ceiling)
-    console.log("Floor", floor)
 
     if (pagesCount < pagesCutCount){
         return {start: 1, end: pagesCount+1};
+    }else if (currentPage >= 1 && currentPage <= ceiling) {
+        return {start: 1, end: pagesCutCount + 1};
+    }else if (currentPage + floor >= pagesCount){
+        return {start: pagesCount-pagesCutCount + 1, end: pagesCount + 1};
+    }else{
+        return {start: currentPage-ceiling + 1, end: currentPage + floor + 1};
     }
 }
 
@@ -30,10 +34,10 @@ const PaginationItem = ({ page, currentPage, onPageChange, isDisabled }) => {
 
 const Pagination = ({ currentPage, total, limit, onPageChange }) => {
   const pagesCount = Math.ceil(total / limit);
-  const pages = range(1, pagesCount);
+  const pagesCut = getPagesCut({pagesCount, pagesCutCount: 5, currentPage});
+  const pages = range(pagesCut.start, pagesCut.end);
   const isFirstPage = currentPage === 1;
-  const isLastPage = currentPage === pages.length;
-  console.log('if 1', getPagesCut({pagesCount, pagesCutCount: 5, currentPage}))
+  const isLastPage = currentPage === pagesCount;
   return (
     <ul className="pagination">
         <PaginationItem
